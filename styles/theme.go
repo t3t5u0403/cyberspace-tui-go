@@ -43,9 +43,10 @@ var (
 	currentTheme = "dark"
 )
 
-// InitThemes stores the embedded filesystem containing theme JSON files
+// InitThemes stores the embedded filesystem and applies the default theme styles.
 func InitThemes(f fs.FS) {
 	themesFS = f
+	rebuildStyles()
 }
 
 // CurrentThemeName returns the name of the currently active theme
@@ -117,166 +118,59 @@ func ApplyTheme(name string) error {
 }
 
 // rebuildStyles reassigns all style vars from the current color vars.
-// NOTE: When adding new styles to the var blocks below, also add them here.
 func rebuildStyles() {
-	// Semantic aliases
-	ColorSecondary = ColorDim
-	ColorAccent = ColorBright
-	ColorWarning = ColorBright
-	ColorContent = ColorNormal
-	ColorText = ColorNormal
-	ColorSuccess = ColorBright
-	ColorInfo = ColorPrimary
-	ColorBorder = ColorDim
-
-	// Text styles
-	Title = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(ColorBright)
-
-	TitleGlow = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(ColorBright).
-		Background(ColorBgDark)
-
-	Username = lipgloss.NewStyle().
-		Foreground(ColorBright).
-		Bold(true)
-
-	Timestamp = lipgloss.NewStyle().
-		Foreground(ColorMuted)
-
-	Content = lipgloss.NewStyle().
-		Foreground(ColorNormal)
-
-	Stats = lipgloss.NewStyle().
-		Foreground(ColorDim)
-
-	Topic = lipgloss.NewStyle().
-		Foreground(ColorNormal)
-
-	Help = lipgloss.NewStyle().
-		Foreground(ColorMuted)
-
-	Label = lipgloss.NewStyle().
-		Foreground(ColorPrimary).
-		Bold(true)
-
-	Error = lipgloss.NewStyle().
-		Foreground(ColorError).
-		Bold(true)
-
-	Success = lipgloss.NewStyle().
-		Foreground(ColorBright).
-		Bold(true)
-
-	Warning = lipgloss.NewStyle().
-		Foreground(ColorBright).
-		Bold(true)
-
-	Dim = lipgloss.NewStyle().
-		Foreground(ColorMuted)
-
-	Bright = lipgloss.NewStyle().
-		Foreground(ColorBright).
-		Bold(true)
-
-	Normal = lipgloss.NewStyle().
-		Foreground(ColorNormal)
-
-	Dark = lipgloss.NewStyle().
-		Foreground(ColorDark)
-
-	// Layout styles
-	Header = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(ColorBright).
-		Padding(0, 1)
-
-	Box = lipgloss.NewStyle().
-		Border(lipgloss.DoubleBorder()).
-		BorderForeground(ColorDim).
-		Padding(1, 2)
-
-	BoxSingle = lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder()).
-		BorderForeground(ColorMuted).
-		Padding(0, 1)
-
-	SelectedItem = lipgloss.NewStyle().
-		Background(ColorPrimary).
-		Foreground(ColorHighlight).
-		Bold(true)
-
-	SelectedItemBorder = lipgloss.NewStyle().
-		Background(ColorBgSelect).
-		BorderLeft(true).
-		BorderStyle(lipgloss.ThickBorder()).
-		BorderForeground(ColorBright)
-
-	Footer = lipgloss.NewStyle().
-		Foreground(ColorMuted).
-		Padding(0, 1)
-
-	Modal = lipgloss.NewStyle().
-		Border(lipgloss.DoubleBorder()).
-		BorderForeground(ColorBright).
-		Padding(1, 2)
-
-	StatusBar = lipgloss.NewStyle().
-		Background(ColorPrimary).
-		Foreground(ColorHighlight).
-		Bold(true).
-		Padding(0, 1)
-
-	FnKey = lipgloss.NewStyle().
-		Background(ColorDim).
-		Foreground(ColorHighlight).
-		Bold(true)
-
-	FnLabel = lipgloss.NewStyle().
-		Background(ColorBgSelect).
-		Foreground(ColorNormal)
-
-	ScanLine = lipgloss.NewStyle().
-		Foreground(ColorDark)
-
+	Title = lipgloss.NewStyle().Bold(true).Foreground(ColorBright)
+	Username = lipgloss.NewStyle().Foreground(ColorBright).Bold(true)
+	Label = lipgloss.NewStyle().Foreground(ColorPrimary).Bold(true)
+	Error = lipgloss.NewStyle().Foreground(ColorError).Bold(true)
+	Success = lipgloss.NewStyle().Foreground(ColorBright).Bold(true)
+	Warning = lipgloss.NewStyle().Foreground(ColorBright).Bold(true)
+	Dim = lipgloss.NewStyle().Foreground(ColorMuted)
+	Bright = lipgloss.NewStyle().Foreground(ColorBright).Bold(true)
+	Normal = lipgloss.NewStyle().Foreground(ColorNormal)
+	Dark = lipgloss.NewStyle().Foreground(ColorDark)
+	SelectedItem = lipgloss.NewStyle().Background(ColorPrimary).Foreground(ColorHighlight).Bold(true)
+	FnKey = lipgloss.NewStyle().Background(ColorDim).Foreground(ColorHighlight).Bold(true)
+	FnLabel = lipgloss.NewStyle().Background(ColorBgSelect).Foreground(ColorNormal)
 	Spinner = lipgloss.NewStyle().Foreground(ColorPrimary)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 80s AMBER PHOSPHOR CRT PALETTE
+// COLOR PALETTE — defaults for the "dark" theme; overwritten by ApplyTheme
 // ═══════════════════════════════════════════════════════════════════════════════
-//
-// Monochrome amber terminal aesthetic - like classic 80s monitors
-// All colors are variations of amber/orange phosphor glow
 
 var (
-	// Amber phosphor tones (bright to dim)
-	ColorBright  = lipgloss.Color("229") // Bright cream
-	ColorPrimary = lipgloss.Color("223") // Warm cream
-	ColorNormal  = lipgloss.Color("222") // Content cream
-	ColorDim     = lipgloss.Color("180") // Dim cream
-	ColorMuted   = lipgloss.Color("137") // Muted
-	ColorDark    = lipgloss.Color("94")  // Dark
+	ColorBright    = lipgloss.Color("229")
+	ColorPrimary   = lipgloss.Color("223")
+	ColorNormal    = lipgloss.Color("222")
+	ColorDim       = lipgloss.Color("180")
+	ColorMuted     = lipgloss.Color("137")
+	ColorDark      = lipgloss.Color("94")
+	ColorError     = lipgloss.Color("166")
+	ColorBgDark    = lipgloss.Color("232")
+	ColorBgSelect  = lipgloss.Color("236")
+	ColorHighlight = lipgloss.Color("0")
+)
 
-	// Semantic aliases (all amber, different intensities)
-	ColorSecondary = ColorDim    // Secondary elements
-	ColorAccent    = ColorBright // Accent/highlight
-	ColorWarning   = ColorBright // Warnings (bright amber)
-	ColorContent   = ColorNormal // Content text
-	ColorText      = ColorNormal // General text
+// ═══════════════════════════════════════════════════════════════════════════════
+// STYLES — set by rebuildStyles(), called from InitThemes() and ApplyTheme()
+// ═══════════════════════════════════════════════════════════════════════════════
 
-	// Status colors (still amber-based)
-	ColorError   = lipgloss.Color("166") // Darker orange-red for errors
-	ColorSuccess = ColorBright           // Bright amber for success
-	ColorInfo    = ColorPrimary          // Standard amber for info
-
-	// Background/UI colors
-	ColorBgDark    = lipgloss.Color("232") // Near black
-	ColorBgSelect  = lipgloss.Color("236") // Dark selection
-	ColorBorder    = ColorDim              // Borders in dim amber
-	ColorHighlight = lipgloss.Color("0")   // Black (for inverse video)
+var (
+	Title        lipgloss.Style
+	Username     lipgloss.Style
+	Label        lipgloss.Style
+	Error        lipgloss.Style
+	Success      lipgloss.Style
+	Warning      lipgloss.Style
+	Dim          lipgloss.Style
+	Bright       lipgloss.Style
+	Normal       lipgloss.Style
+	Dark         lipgloss.Style
+	SelectedItem lipgloss.Style
+	FnKey        lipgloss.Style
+	FnLabel      lipgloss.Style
+	Spinner      lipgloss.Style
 )
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -292,178 +186,10 @@ var Logo = `
 ╚██████╗   ██║   ██████╔╝███████╗██║  ██║███████║██║     ██║  ██║╚██████╗███████╗
  ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝`
 
-// LogoSmall is a smaller version for tighter spaces
-var LogoSmall = `
-▄████▄▓██   ██▓ ▄▄▄▄   ▓█████  ██▀███    ██████  ██▓███   ▄▄▄       ▄████▄  ▓█████
-▒██▀ ▀█ ▒██  ██▒▓█████▄ ▓█   ▀ ▓██ ▒ ██▒▒██    ▒ ▓██░  ██▒▒████▄    ▒██▀ ▀█  ▓█   ▀
-▒▓█    ▄ ▒██ ██░▒██▒ ▄██▒███   ▓██ ░▄█ ▒░ ▓██▄   ▓██░ ██▓▒▒██  ▀█▄  ▒▓█    ▄ ▒███
-▒▓▓▄ ▄██▒░ ▐██▓░▒██░█▀  ▒▓█  ▄ ▒██▀▀█▄    ▒   ██▒▒██▄█▓▒ ▒░██▄▄▄▄██ ▒▓▓▄ ▄██▒▒▓█  ▄
-▒ ▓███▀ ░░ ██▒▓░░▓█  ▀█▓░▒████▒░██▓ ▒██▒▒██████▒▒▒██▒ ░  ░ ▓█   ▓██▒▒ ▓███▀ ░░▒████▒
-░ ░▒ ▒  ░ ██▒▒▒ ░▒▓███▀▒░░ ▒░ ░░ ▒▓ ░▒▓░▒ ▒▓▒ ▒ ░▒▓▒░ ░  ░ ▒▒   ▓▒█░░ ░▒ ▒  ░░░ ▒░ ░`
-
 // LogoMini for very small terminals
 var LogoMini = `╔═╗╦ ╦╔╗ ╔═╗╦═╗╔═╗╔═╗╔═╗╔═╗╔═╗
 ║  ╚╦╝╠╩╗║╣ ╠╦╝╚═╗╠═╝╠═╣║  ║╣
 ╚═╝ ╩ ╚═╝╚═╝╩╚═╚═╝╩  ╩ ╩╚═╝╚═╝`
-
-// SystemBanner for headers
-var SystemBanner = `┌─────────────────────────────────────────────────────────────────────────────────┐
-│  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  │
-│  ██████╗██╗   ██╗██████╗ ███████╗██████╗ ███████╗██████╗  █████╗  ██████╗███████╗│
-│  ██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝│
-│  ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝│
-│  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄  │
-└─────────────────────────────────────────────────────────────────────────────────┘`
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// TEXT STYLES - AMBER PHOSPHOR
-// ═══════════════════════════════════════════════════════════════════════════════
-
-var (
-	// Title styles - bright and bold for maximum phosphor glow
-	Title = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(ColorBright)
-
-	TitleGlow = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(ColorBright).
-			Background(ColorBgDark)
-
-	// User/Author styles - bright amber, bold
-	Username = lipgloss.NewStyle().
-			Foreground(ColorBright).
-			Bold(true)
-
-	// Time/date styles - dimmed phosphor
-	Timestamp = lipgloss.NewStyle().
-			Foreground(ColorMuted)
-
-	// Content text - normal amber glow
-	Content = lipgloss.NewStyle().
-		Foreground(ColorNormal)
-
-	// Stats and metadata - dim
-	Stats = lipgloss.NewStyle().
-		Foreground(ColorDim)
-
-	// Topics/tags - normal amber
-	Topic = lipgloss.NewStyle().
-		Foreground(ColorNormal)
-
-	// Help text - muted/dim
-	Help = lipgloss.NewStyle().
-		Foreground(ColorMuted)
-
-	// Labels - primary amber, bold
-	Label = lipgloss.NewStyle().
-		Foreground(ColorPrimary).
-		Bold(true)
-
-	// Error messages - still visible but amber-ish
-	Error = lipgloss.NewStyle().
-		Foreground(ColorError).
-		Bold(true)
-
-	// Success messages - bright amber
-	Success = lipgloss.NewStyle().
-		Foreground(ColorBright).
-		Bold(true)
-
-	// Warning messages - bright amber bold
-	Warning = lipgloss.NewStyle().
-		Foreground(ColorBright).
-		Bold(true)
-
-	// Dim/subtle text - very low phosphor
-	Dim = lipgloss.NewStyle().
-		Foreground(ColorMuted)
-
-	// Bright/highlighted text - full phosphor glow
-	Bright = lipgloss.NewStyle().
-		Foreground(ColorBright).
-		Bold(true)
-
-	// Normal text - standard amber
-	Normal = lipgloss.NewStyle().
-		Foreground(ColorNormal)
-
-	// Dark/very subtle - barely visible phosphor
-	Dark = lipgloss.NewStyle().
-		Foreground(ColorDark)
-)
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// LAYOUT STYLES - AMBER PHOSPHOR
-// ═══════════════════════════════════════════════════════════════════════════════
-
-var (
-	// Header style - bright amber bold
-	Header = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(ColorBright).
-		Padding(0, 1)
-
-	// Double-line border box (retro terminal style) - dim amber borders
-	Box = lipgloss.NewStyle().
-		Border(lipgloss.DoubleBorder()).
-		BorderForeground(ColorDim).
-		Padding(1, 2)
-
-	// Single-line border for inner panels
-	BoxSingle = lipgloss.NewStyle().
-			Border(lipgloss.NormalBorder()).
-			BorderForeground(ColorMuted).
-			Padding(0, 1)
-
-	// Inverse video selection (classic CRT style) - amber on black
-	SelectedItem = lipgloss.NewStyle().
-			Background(ColorPrimary).
-			Foreground(ColorHighlight).
-			Bold(true)
-
-	// Subtle selection with border
-	SelectedItemBorder = lipgloss.NewStyle().
-				Background(ColorBgSelect).
-				BorderLeft(true).
-				BorderStyle(lipgloss.ThickBorder()).
-				BorderForeground(ColorBright)
-
-	// Footer - dim
-	Footer = lipgloss.NewStyle().
-		Foreground(ColorMuted).
-		Padding(0, 1)
-
-	// Modal dialog (for popups/alerts) - bright borders
-	Modal = lipgloss.NewStyle().
-		Border(lipgloss.DoubleBorder()).
-		BorderForeground(ColorBright).
-		Padding(1, 2)
-
-	// Status bar - inverse amber
-	StatusBar = lipgloss.NewStyle().
-			Background(ColorPrimary).
-			Foreground(ColorHighlight).
-			Bold(true).
-			Padding(0, 1)
-
-	// Function key style - inverse for key number
-	FnKey = lipgloss.NewStyle().
-		Background(ColorDim).
-		Foreground(ColorHighlight).
-		Bold(true)
-
-	FnLabel = lipgloss.NewStyle().
-		Background(ColorBgSelect).
-		Foreground(ColorNormal)
-
-	// Scan line effect (decorative) - very dim
-	ScanLine = lipgloss.NewStyle().
-			Foreground(ColorDark)
-)
-
-// Spinner style - primary amber
-var Spinner = lipgloss.NewStyle().Foreground(ColorPrimary)
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HELPER FUNCTIONS
@@ -492,16 +218,6 @@ func Divider(width int) string {
 		Render(strings.Repeat("─", width))
 }
 
-// DoubleDivider returns a double-line horizontal divider (normal amber)
-func DoubleDivider(width int) string {
-	if width < 1 {
-		width = 80
-	}
-	return lipgloss.NewStyle().
-		Foreground(ColorDim).
-		Render(strings.Repeat("═", width))
-}
-
 // ScanLineDivider creates a decorative scan-line effect divider (dark amber)
 func ScanLineDivider(width int) string {
 	if width < 1 {
@@ -510,21 +226,6 @@ func ScanLineDivider(width int) string {
 	return lipgloss.NewStyle().
 		Foreground(ColorDark).
 		Render(strings.Repeat("░", width))
-}
-
-// GlitchDivider creates a "glitchy" divider for sci-fi effect (amber gradient)
-func GlitchDivider(width int) string {
-	if width < 1 {
-		width = 80
-	}
-	pattern := "▓▒░"
-	var result strings.Builder
-	for i := 0; i < width; i++ {
-		result.WriteByte(pattern[i%len(pattern)])
-	}
-	return lipgloss.NewStyle().
-		Foreground(ColorDim).
-		Render(result.String())
 }
 
 // TitledBox creates a retro-style box with title embedded in the top border
@@ -649,102 +350,6 @@ func FnKeyBar(keys map[string]string, width int) string {
 		Render(bar)
 }
 
-// ProgressBar creates an ASCII progress bar (amber phosphor style)
-func ProgressBar(percent float64, width int) string {
-	if width < 10 {
-		width = 10
-	}
-	barWidth := width - 7
-
-	filled := int(float64(barWidth) * percent)
-	if filled > barWidth {
-		filled = barWidth
-	}
-	empty := barWidth - filled
-
-	// Dim brackets, bright fill, dark empty
-	bar := lipgloss.NewStyle().Foreground(ColorDim).Render("[") +
-		lipgloss.NewStyle().Foreground(ColorBright).Render(strings.Repeat("█", filled)) +
-		lipgloss.NewStyle().Foreground(ColorDark).Render(strings.Repeat("░", empty)) +
-		lipgloss.NewStyle().Foreground(ColorDim).Render("]")
-
-	pct := lipgloss.NewStyle().Foreground(ColorNormal).Render(
-		fmt.Sprintf("%3d%%", int(percent*100)),
-	)
-
-	return bar + " " + pct
-}
-
-// ProgressBarSimple creates a simple block progress bar
-func ProgressBarSimple(percent float64, width int) string {
-	filled := int(float64(width) * percent)
-	if filled > width {
-		filled = width
-	}
-	empty := width - filled
-
-	// Bright fill, dark empty
-	return lipgloss.NewStyle().Foreground(ColorPrimary).Render(strings.Repeat("█", filled)) +
-		lipgloss.NewStyle().Foreground(ColorDark).Render(strings.Repeat("░", empty))
-}
-
-// StatusBarSegment creates a highlighted status bar segment
-func StatusBarSegment(label, value string) string {
-	return StatusBar.Render(label+":") +
-		lipgloss.NewStyle().
-			Background(ColorBgSelect).
-			Foreground(ColorContent).
-			Padding(0, 1).
-			Render(value)
-}
-
-// MenuItem creates a menu item, optionally selected
-func MenuItem(text string, selected bool, width int) string {
-	textWidth := lipgloss.Width(text)
-	if textWidth < width {
-		text += strings.Repeat(" ", width-textWidth)
-	}
-
-	if selected {
-		return SelectedItem.Render(text)
-	}
-	return lipgloss.NewStyle().Foreground(ColorContent).Render(text)
-}
-
-// TableHeader creates a table header row with underline (amber phosphor)
-func TableHeader(columns []string, widths []int) string {
-	var parts []string
-	for i, col := range columns {
-		w := 10
-		if i < len(widths) {
-			w = widths[i]
-		}
-		if len(col) > w {
-			col = col[:w]
-		} else {
-			col += strings.Repeat(" ", w-len(col))
-		}
-		parts = append(parts, col)
-	}
-
-	// Bright amber for headers
-	header := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(ColorBright).
-		Render(strings.Join(parts, " "))
-
-	totalWidth := 0
-	for _, w := range widths {
-		totalWidth += w + 1
-	}
-	// Dim amber for underline
-	underline := lipgloss.NewStyle().
-		Foreground(ColorMuted).
-		Render(strings.Repeat("─", totalWidth))
-
-	return header + "\n" + underline
-}
-
 // SystemPrompt creates a system prompt prefix (amber phosphor)
 func SystemPrompt(text string) string {
 	prompt := lipgloss.NewStyle().
@@ -793,54 +398,6 @@ func AlertBox(message string, alertType string, width int) string {
 	return top + "\n" + mid + "\n" + bottom
 }
 
-// ProgressFullColor returns the fill color for the progress bubble as a hex string.
-func ProgressFullColor() string {
-	return colorToHex(ColorPrimary)
-}
-
-// ProgressEmptyColor returns the empty color for the progress bubble as a hex string.
-func ProgressEmptyColor() string {
-	return colorToHex(ColorDark)
-}
-
-// colorToHex maps common xterm-256 color codes to hex equivalents.
-// Falls back to a default amber for unknown codes.
-func colorToHex(c lipgloss.Color) string {
-	// Map the xterm-256 codes we use in our themes
-	m := map[string]string{
-		// Amber/VT320 tones
-		"220": "#ffd700", "214": "#ffaf00", "178": "#d7af00",
-		"172": "#d78700", "136": "#af8700", "94": "#875f00",
-		"166": "#d75f00",
-		// Dark theme (warm cream)
-		"229": "#ffffaf", "223": "#ffd7af", "222": "#ffd787",
-		"180": "#d7af87",  "137": "#af8757",
-		// Grays (C64 / monochrome)
-		"255": "#eeeeee", "252": "#d0d0d0", "250": "#bcbcbc",
-		"247": "#9e9e9e", "244": "#808080", "241": "#626262",
-		"240": "#585858", "237": "#3a3a3a", "236": "#303030",
-		"233": "#121212", "232": "#080808",
-		// Greens (Matrix)
-		"118": "#87ff00", "113": "#87d75f", "70": "#5faf00",
-		"46": "#00ff00", "40": "#00d700", "34": "#00af00",
-		"28": "#008700", "22": "#005f00",
-		// Blues (C64 bg, Brutalist)
-		"189": "#d7d7ff", "153": "#afd7ff", "146": "#afafd7",
-		"103": "#8787af", "60": "#5f5f87",
-		"39": "#00afff", "33": "#0087ff", "27": "#005fff",
-		"21": "#0000ff", "19": "#0000af", "17": "#00005f",
-		// Reds (Crypt)
-		"196": "#ff0000", "160": "#d70000", "124": "#af0000",
-		"88": "#870000", "52": "#5f0000",
-		// Fallbacks
-		"0": "#000000",
-	}
-	if hex, ok := m[string(c)]; ok {
-		return hex
-	}
-	return "#d7af00" // default amber
-}
-
 // ListStyles returns list.Styles themed to the current color palette.
 func ListStyles() list.Styles {
 	s := list.DefaultStyles()
@@ -882,16 +439,3 @@ func HelpStyles() help.Styles {
 	}
 }
 
-// Blinker returns a blinking cursor character (for animation)
-func Blinker(on bool) string {
-	if on {
-		return lipgloss.NewStyle().Foreground(ColorBright).Render("█")
-	}
-	return " "
-}
-
-// DataField renders a label: value pair (amber phosphor style)
-func DataField(label, value string) string {
-	return lipgloss.NewStyle().Foreground(ColorDim).Render(label+": ") +
-		lipgloss.NewStyle().Foreground(ColorBright).Render(value)
-}

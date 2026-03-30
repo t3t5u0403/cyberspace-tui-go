@@ -57,37 +57,12 @@ type authDataResponse struct {
 
 // SignIn authenticates with the Cyberspace API using email and password
 func (c *Client) SignIn(email, password string) (*AuthResponse, error) {
-	reqBody := AuthRequest{
+	body, err := c.doPost(c.BaseURL+"/v1/auth/login", AuthRequest{
 		Email:    email,
 		Password: password,
-	}
-
-	jsonBody, err := json.Marshal(reqBody)
+	}, "login failed")
 	if err != nil {
 		return nil, err
-	}
-
-	url := fmt.Sprintf("%s/v1/auth/login", c.BaseURL)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", userAgent)
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, parseAPIError(body, "login failed")
 	}
 
 	var dataResp authDataResponse
@@ -105,19 +80,39 @@ func (c *Client) SignIn(email, password string) (*AuthResponse, error) {
 
 // RefreshToken exchanges a refresh token for a new ID token
 func (c *Client) RefreshToken(refreshToken string) (*RefreshResponse, error) {
-	reqBody := RefreshRequest{
+	body, err := c.doPost(c.BaseURL+"/v1/auth/refresh", RefreshRequest{
 		RefreshToken: refreshToken,
-	}
-
-	jsonBody, err := json.Marshal(reqBody)
+	}, "token refresh failed")
 	if err != nil {
 		return nil, err
 	}
 
-	url := fmt.Sprintf("%s/v1/auth/refresh", c.BaseURL)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
+	var dataResp authDataResponse
+	if err := json.Unmarshal(body, &dataResp); err != nil {
+		return nil, err
+	}
+
+	var refreshResp RefreshResponse
+	if err := json.Unmarshal(dataResp.Data, &refreshResp); err != nil {
+		return nil, err
+	}
+
+	return &refreshResp, nil
+}
+
+// doPost performs an authenticated POST request with a JSON payload.
+func (c *Client) doPost(reqURL string, payload any, errContext string) ([]byte, error) {
+	jsonBody, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, err
+	}
+	if c.IDToken != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.IDToken))
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", userAgent)
@@ -133,21 +128,11 @@ func (c *Client) RefreshToken(refreshToken string) (*RefreshResponse, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, parseAPIError(body, "token refresh failed")
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		return nil, parseAPIError(body, errContext)
 	}
 
-	var dataResp authDataResponse
-	if err := json.Unmarshal(body, &dataResp); err != nil {
-		return nil, err
-	}
-
-	var refreshResp RefreshResponse
-	if err := json.Unmarshal(dataResp.Data, &refreshResp); err != nil {
-		return nil, err
-	}
-
-	return &refreshResp, nil
+	return body, nil
 }
 
 // parseAPIError extracts a user-friendly error from the API error response

@@ -153,32 +153,12 @@ type createReplyResponse struct {
 
 // CreateReply posts a new reply to a post
 func (c *Client) CreateReply(postID, content string) (string, error) {
-	payload, _ := json.Marshal(createReplyRequest{
+	body, err := c.doPost(c.BaseURL+"/v1/replies", createReplyRequest{
 		PostID:  postID,
 		Content: content,
-	})
-
-	req, err := http.NewRequest("POST", c.BaseURL+"/v1/replies", strings.NewReader(string(payload)))
+	}, "failed to create reply")
 	if err != nil {
 		return "", err
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.IDToken))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", userAgent)
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		return "", parseAPIError(body, "Failed to create reply")
 	}
 
 	var result createReplyResponse

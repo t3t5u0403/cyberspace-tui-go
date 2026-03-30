@@ -1,69 +1,118 @@
-# Cyberspace TUI
-
-A terminal-based client for [Cyberspace](https://cyberspace.online/)
-
 ```
-██████████████████████████████████████████████████████████████████████████████████
-██████████████████████████▓▒░ ᑕ¥βєяรקค¢є ░▒▓██████████████████████████████████████
-██████████████████████████████████████████████████████████████████████████████████
+ ██████╗██╗   ██╗██████╗ ███████╗██████╗ ███████╗██████╗  █████╗  ██████╗███████╗
+██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝
+██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝███████╗██████╔╝███████║██║     █████╗
+██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗╚════██║██╔═══╝ ██╔══██║██║     ██╔══╝
+╚██████╗   ██║   ██████╔╝███████╗██║  ██║███████║██║     ██║  ██║╚██████╗███████╗
+ ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝
 ```
+
+A retro terminal client for [Cyberspace](https://cyberspace.online/) built with Go and [Bubble Tea](https://github.com/charmbracelet/bubbletea).
+
+Browse the feed, read posts and replies, compose replies, and switch between CRT-inspired themes — all from your terminal.
 
 ## Features
 
-- Browse the Cyberspace feed in your terminal
-- View posts and replies
-- Vim-style navigation (j/k)
-- Load more posts with pagination
+- Browse the Cyberspace feed with cursor-based pagination
+- View posts and threaded replies
+- Compose and send replies
+- 5 built-in themes (Dark, Amber VT320, Matrix, Crypt, Brutalist)
+- Live theme preview with instant switching
+- Vim-style navigation throughout
+- Mouse support (click to open posts, scroll)
+- Responsive layout (adapts to terminal size)
+- Token persistence with automatic refresh
 
-## Installation
+## Building from source
 
-Download the appropriate binary for your platform from the `bin/` folder:
-
-| Platform | Folder | Binary |
-|----------|--------|--------|
-| macOS (Apple Silicon) | `bin/mac/` | `cyberspace-tui` |
-| macOS (Intel) | `bin/mac-intel/` | `cyberspace-tui` |
-| Linux (x64) | `bin/linux/` | `cyberspace-tui` |
-| Linux (32-bit) | `bin/linux-32/` | `cyberspace-tui` |
-| Windows (x64) | `bin/win/` | `cyberspace-tui.exe` |
-| Windows (32-bit) | `bin/win-32/` | `cyberspace-tui.exe` |
-
-### macOS / Linux
+Requires **Go 1.24+**.
 
 ```bash
-# Download and make executable
-chmod +x cyberspace-tui
-
-# Run
-./cyberspace-tui
+go build -o cyberspace-cli .
+./cyberspace-cli
 ```
 
-### Windows
+Or use the included build script:
 
-```powershell
-.\cyberspace-tui.exe
+```bash
+./build.sh
 ```
 
-## Usage
+## Configuration
 
-### Navigation
+The API URL defaults to `https://api.cyberspace.online`. Override it with an environment variable or `.env` file:
+
+```bash
+CYBERSPACE_API_URL=https://your-api.example.com ./cyberspace-cli
+```
+
+Auth tokens and theme preference are saved to `~/.cyberspace-cli.json`.
+
+## Keybindings
+
+### Feed
 
 | Key | Action |
 |-----|--------|
-| `j` / `↓` | Move down |
-| `k` / `↑` | Move up |
-| `g` | Go to top |
-| `G` | Go to bottom |
-| `Enter` | Open post / Load more |
-| `Esc` / `b` | Go back |
-| `r` | Refresh |
+| `j` / `k` | Move down / up |
+| `g` / `G` | Jump to top / bottom |
+| `Enter` | Open post |
+| `r` | Refresh feed |
+| `t` | Switch theme |
+| `L` | Log out |
+| `?` | Toggle full help |
 | `q` | Quit |
 
-### Authentication
+### Post detail
 
-On first run, you'll be prompted to enter your email and password to authenticate with Cyberspace.
+| Key | Action |
+|-----|--------|
+| `j` / `k` | Scroll down / up |
+| `f` / `pgdn` | Page down |
+| `u` / `d` | Half-page up / down |
+| `g` / `G` | Jump to top / bottom |
+| `c` | Compose reply |
+| `r` | Refresh |
+| `esc` / `b` | Back to feed |
+| `q` | Quit |
+
+### Compose mode
+
+| Key | Action |
+|-----|--------|
+| `ctrl+s` | Send reply |
+| `esc` | Cancel |
+
+## Project structure
+
+```
+.
+├── main.go              # App entrypoint, state machine, screen routing
+├── config.go            # Auth token persistence and refresh logic
+├── api/
+│   ├── auth.go          # Login, token refresh, HTTP helpers
+│   └── posts.go         # Posts and replies CRUD
+├── models/
+│   └── post.go          # Post, Reply, Attachment data types
+├── styles/
+│   └── theme.go         # Theme engine, color palette, style helpers
+├── views/
+│   ├── feed.go          # Feed screen (list + pagination)
+│   ├── post_detail.go   # Post viewer + reply composer
+│   ├── post_item.go     # Card rendering for feed items
+│   ├── login.go         # Login screen
+│   ├── theme_switcher.go # Theme selection modal
+│   ├── keys.go          # Keybinding definitions
+│   └── helpers.go       # Text utilities, layout helpers
+└── themes/              # JSON theme definitions
+    ├── dark.json
+    ├── amber.json
+    ├── matrix.json
+    ├── red.json
+    └── brutalist.json
+```
 
 ## Requirements
 
 - A [Cyberspace](https://cyberspace.online/) account
-- Terminal with ANSI color support
+- Terminal with 256-color support

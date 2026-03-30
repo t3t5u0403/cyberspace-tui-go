@@ -106,6 +106,9 @@ func (m FeedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		switch {
+		case msg.String() == "esc":
+			// esc never quits — swallow it on the feed screen
+			return m, nil
 		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.Help):
@@ -248,24 +251,7 @@ func (m FeedModel) View() string {
 }
 
 func (m FeedModel) renderHeader(width int) string {
-	title := "▓▒░ ᑕ¥βєяรקค¢є ░▒▓"
-	titleRendered := styles.Title.Render(title)
-	titleWidth := lipgloss.Width(titleRendered)
-
-	barWidth := (width - titleWidth) / 2
-	if barWidth < 0 {
-		barWidth = 0
-	}
-	rightBarWidth := width - titleWidth - barWidth
-	if rightBarWidth < 0 {
-		rightBarWidth = 0
-	}
-
-	barStyle := lipgloss.NewStyle().Foreground(styles.ColorBright)
-	leftBar := barStyle.Render(strings.Repeat("█", barWidth))
-	rightBar := barStyle.Render(strings.Repeat("█", rightBarWidth))
-
-	return leftBar + titleRendered + rightBar + "\n"
+	return RenderHeader("▓▒░ ᑕ¥βєяรקค¢є ░▒▓", width)
 }
 
 func (m FeedModel) renderFooter(width int) string {

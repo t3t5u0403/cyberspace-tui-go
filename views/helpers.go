@@ -55,6 +55,36 @@ func Truncate(s string, max int) string {
 	return s + "..."
 }
 
+// wrapText wraps text to fit within a visual width, splitting on word boundaries.
+func wrapText(text string, width int) []string {
+	if width <= 0 {
+		return []string{text}
+	}
+
+	var lines []string
+	words := strings.Fields(text)
+	if len(words) == 0 {
+		return []string{""}
+	}
+
+	currentLine := words[0]
+	currentWidth := lipgloss.Width(currentLine)
+	for _, word := range words[1:] {
+		wordWidth := lipgloss.Width(word)
+		if currentWidth+1+wordWidth <= width {
+			currentLine += " " + word
+			currentWidth += 1 + wordWidth
+		} else {
+			lines = append(lines, currentLine)
+			currentLine = word
+			currentWidth = wordWidth
+		}
+	}
+	lines = append(lines, currentLine)
+
+	return lines
+}
+
 var (
 	reLink       = regexp.MustCompile(`\[([^\]]+)\]\([^)]+\)`)
 	reBold       = regexp.MustCompile(`\*\*(.+?)\*\*`)
@@ -63,11 +93,24 @@ var (
 	reItalUndsc  = regexp.MustCompile(`\b_(.+?)_\b`)
 	reCode       = regexp.MustCompile("`([^`]+)`")
 	reHeading    = regexp.MustCompile(`(?m)^#{1,6}\s+`)
-	reCodeBlock  = regexp.MustCompile("(?s)```[a-z]*\n?(.*?)```")
+	reCodeBlock    = regexp.MustCompile("(?s)```[a-z]*\n?(.*?)```")
+	reNbspLine     = regexp.MustCompile(`(?m)^[ \t]*&nbsp;[ \t]*$`)
+	reNbspUniLine  = regexp.MustCompile("(?m)^[ \t]*\u00A0[ \t]*$")
+	reMultiBlank   = regexp.MustCompile(`\n{3,}`)
 )
+
+// cleanContent removes &nbsp;-only lines and collapses excessive blank lines,
+// matching the Nuxt4 web app's useMarkdownRenderer sanitization.
+func cleanContent(s string) string {
+	s = reNbspLine.ReplaceAllString(s, "")
+	s = reNbspUniLine.ReplaceAllString(s, "")
+	s = reMultiBlank.ReplaceAllString(s, "\n\n")
+	return s
+}
 
 // stripMarkdownCommon applies shared markdown stripping rules
 func stripMarkdownCommon(s string) string {
+	s = cleanContent(s)
 	s = reCodeBlock.ReplaceAllString(s, "$1")
 	s = reLink.ReplaceAllString(s, "$1")
 	s = reBold.ReplaceAllString(s, "$1")
@@ -100,33 +143,6 @@ func StripMarkdownKeepNewlines(s string) string {
 	return strings.TrimSpace(s)
 }
 
-// Min returns the smaller of two integers
-func Min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// Max returns the larger of two integers
-func Max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-// Clamp restricts a value to a range
-func Clamp(value, min, max int) int {
-	if value < min {
-		return min
-	}
-	if value > max {
-		return max
-	}
-	return value
-}
-
 // SafeDimensions returns width and height with sensible defaults
 // Use this before WindowSizeMsg has been received
 func SafeDimensions(width, height int) (int, int) {
@@ -139,78 +155,31 @@ func SafeDimensions(width, height int) (int, int) {
 	return width, height
 }
 
-// FullScreen renders content in a full-screen container
+// FullScreen renders content centered in a full-screen container.
 func FullScreen(content string, width, height int, hAlign, vAlign lipgloss.Position) string {
 	w, h := SafeDimensions(width, height)
+	return lipgloss.Place(w, h, hAlign, vAlign, content)
+}
 
-	// Count current lines
-	lines := strings.Split(content, "\n")
-	contentHeight := len(lines)
+// RenderHeader renders a centered title bar with block-fill sides.
+func RenderHeader(title string, width int) string {
+	titleRendered := styles.Title.Render(title)
+	titleWidth := lipgloss.Width(titleRendered)
 
-	// Calculate padding needed
-	var topPad, bottomPad int
-	if vAlign == lipgloss.Center {
-		topPad = (h - contentHeight) / 2
-		bottomPad = h - contentHeight - topPad
-	} else if vAlign == lipgloss.Bottom {
-		topPad = h - contentHeight
-	} else { // Top
-		bottomPad = h - contentHeight
+	barWidth := (width - titleWidth) / 2
+	if barWidth < 0 {
+		barWidth = 0
+	}
+	rightBarWidth := width - titleWidth - barWidth
+	if rightBarWidth < 0 {
+		rightBarWidth = 0
 	}
 
-	// Ensure non-negative
-	if topPad < 0 {
-		topPad = 0
-	}
-	if bottomPad < 0 {
-		bottomPad = 0
-	}
+	barStyle := lipgloss.NewStyle().Foreground(styles.ColorBright)
+	leftBar := barStyle.Render(strings.Repeat("█", barWidth))
+	rightBar := barStyle.Render(strings.Repeat("█", rightBarWidth))
 
-	// Build padded content
-	var b strings.Builder
-
-	// Top padding
-	for i := 0; i < topPad; i++ {
-		b.WriteString(strings.Repeat(" ", w))
-		b.WriteString("\n")
-	}
-
-	// Content - pad each line to full width
-	for i, line := range lines {
-		lineLen := lipgloss.Width(line)
-		var padLeft, padRight int
-
-		if hAlign == lipgloss.Center {
-			padLeft = (w - lineLen) / 2
-			padRight = w - lineLen - padLeft
-		} else if hAlign == lipgloss.Right {
-			padLeft = w - lineLen
-		} else { // Left
-			padRight = w - lineLen
-		}
-
-		if padLeft < 0 {
-			padLeft = 0
-		}
-		if padRight < 0 {
-			padRight = 0
-		}
-
-		b.WriteString(strings.Repeat(" ", padLeft))
-		b.WriteString(line)
-		b.WriteString(strings.Repeat(" ", padRight))
-		if i < len(lines)-1 {
-			b.WriteString("\n")
-		}
-	}
-
-	// Bottom padding
-	for i := 0; i < bottomPad; i++ {
-		b.WriteString("\n")
-		b.WriteString(strings.Repeat(" ", w))
-	}
-
-	return b.String()
+	return leftBar + titleRendered + rightBar + "\n"
 }
 
 // NewSpinner creates a sci-fi styled spinner
@@ -223,35 +192,6 @@ func NewSpinner() spinner.Model {
 	}
 	s.Style = styles.Spinner
 	return s
-}
-
-// CenterText centers text within a given width
-func CenterText(text string, width int) string {
-	textWidth := lipgloss.Width(text)
-	if textWidth >= width {
-		return text
-	}
-	padding := (width - textWidth) / 2
-	return strings.Repeat(" ", padding) + text
-}
-
-// styleLines applies a lipgloss style to each line of a multi-line string.
-// This is needed because lipgloss.Render on a multi-line string only colors the first line.
-func styleLines(s string, style lipgloss.Style) string {
-	lines := strings.Split(s, "\n")
-	for i, line := range lines {
-		lines[i] = style.Render(line)
-	}
-	return strings.Join(lines, "\n")
-}
-
-// PadRight pads text to a given width
-func PadRight(text string, width int) string {
-	textWidth := lipgloss.Width(text)
-	if textWidth >= width {
-		return text
-	}
-	return text + strings.Repeat(" ", width-textWidth)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

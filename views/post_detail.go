@@ -296,24 +296,7 @@ func (m PostDetailModel) View() string {
 }
 
 func (m PostDetailModel) renderHeader(width int) string {
-	title := "▓▒░ ENTRY VIEWER ░▒▓"
-	titleRendered := styles.Title.Render(title)
-	titleWidth := lipgloss.Width(titleRendered)
-
-	barWidth := (width - titleWidth) / 2
-	if barWidth < 0 {
-		barWidth = 0
-	}
-	rightBarWidth := width - titleWidth - barWidth
-	if rightBarWidth < 0 {
-		rightBarWidth = 0
-	}
-
-	barStyle := lipgloss.NewStyle().Foreground(styles.ColorBright)
-	leftBar := barStyle.Render(strings.Repeat("█", barWidth))
-	rightBar := barStyle.Render(strings.Repeat("█", rightBarWidth))
-
-	return leftBar + titleRendered + rightBar + "\n\n"
+	return RenderHeader("▓▒░ ENTRY VIEWER ░▒▓", width) + "\n"
 }
 
 func (m PostDetailModel) renderFooter(width int) string {
@@ -526,36 +509,6 @@ func renderBox(title, content string, width int) string {
 	}
 
 	return top + "\n" + middle.String() + bottom
-}
-
-// wrapText wraps text to fit within a visual width
-func wrapText(text string, width int) []string {
-	if width <= 0 {
-		return []string{text}
-	}
-
-	var lines []string
-	words := strings.Fields(text)
-	if len(words) == 0 {
-		return []string{""}
-	}
-
-	currentLine := words[0]
-	currentWidth := lipgloss.Width(currentLine)
-	for _, word := range words[1:] {
-		wordWidth := lipgloss.Width(word)
-		if currentWidth+1+wordWidth <= width {
-			currentLine += " " + word
-			currentWidth += 1 + wordWidth
-		} else {
-			lines = append(lines, currentLine)
-			currentLine = word
-			currentWidth = wordWidth
-		}
-	}
-	lines = append(lines, currentLine)
-
-	return lines
 }
 
 func (m PostDetailModel) fetchPostAndReplies() tea.Cmd {
