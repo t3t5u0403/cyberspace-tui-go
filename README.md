@@ -7,15 +7,14 @@
  ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝
 ```
 
-A retro terminal client for [Cyberspace](https://cyberspace.online/) built with Go and [Bubble Tea](https://github.com/charmbracelet/bubbletea).
+A terminal client for [Cyberspace](https://cyberspace.online/) built with Go and [Bubble Tea](https://github.com/charmbracelet/bubbletea).
 
-Browse the feed, read posts and replies, compose replies, and switch between CRT-inspired themes — all from your terminal.
+Browse the feed, read posts and replies, and switch themes.
 
 ## Features
 
 - Browse the Cyberspace feed with cursor-based pagination
 - View posts and threaded replies
-- Compose and send replies
 - 5 built-in themes (Dark, Amber VT320, Matrix, Crypt, Brutalist)
 - Live theme preview with instant switching
 - Vim-style navigation throughout
@@ -39,12 +38,6 @@ Or use the included build script:
 ```
 
 ## Configuration
-
-The API URL defaults to `https://api.cyberspace.online`. Override it with an environment variable or `.env` file:
-
-```bash
-CYBERSPACE_API_URL=https://your-api.example.com ./cyberspace-cli
-```
 
 Auth tokens and theme preference are saved to `~/.cyberspace-cli.json`.
 
@@ -75,13 +68,6 @@ Auth tokens and theme preference are saved to `~/.cyberspace-cli.json`.
 | `r` | Refresh |
 | `esc` / `b` | Back to feed |
 | `q` | Quit |
-
-### Compose mode
-
-| Key | Action |
-|-----|--------|
-| `ctrl+s` | Send reply |
-| `esc` | Cancel |
 
 ## Project structure
 
